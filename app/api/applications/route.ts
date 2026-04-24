@@ -1,85 +1,54 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET /api/applications/[id]
-// Returns a single application by ID
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+// GET /api/applications
+// Returns all applications in the database as JSON
+export async function GET() {
   try {
-    const { id } = await params;
-
-    const application = await prisma.application.findUnique({
-      where: { id },
+    const applications = await prisma.application.findMany({
+      orderBy: { dateApplied: "desc" },
     });
 
-    if (!application) {
+    return NextResponse.json(applications);
+  } catch (error) {
+    console.error("Error fetching applications:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch applications" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/applications
+// Creates a new application from the request body
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+
+    // Basic validation — required fields
+    if (!body.userId || !body.company || !body.role) {
       return NextResponse.json(
-        { error: "Application not found" },
-        { status: 404 }
+        { error: "Missing required fields: userId, company, role" },
+        { status: 400 }
       );
     }
 
-    return NextResponse.json(application);
-  } catch (error) {
-    console.error("Error fetching application:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch application" },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT /api/applications/[id]
-// Updates an application by ID
-export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const body = await request.json();
-
-    const updatedApplication = await prisma.application.update({
-      where: { id },
+    const newApplication = await prisma.application.create({
       data: {
+        userId: body.userId,
         company: body.company,
         role: body.role,
-        link: body.link,
-        status: body.status,
-        notes: body.notes,
+        link: body.link || null,
+        status: body.status || "APPLIED",
+        notes: body.notes || null,
       },
     });
 
-    return NextResponse.json(updatedApplication);
+    return NextResponse.json(newApplication, { status: 201 });
   } catch (error) {
-    console.error("Error updating application:", error);
+    console.error("Error creating application:", error);
     return NextResponse.json(
-      { error: "Failed to update application" },
-      { status: 500 }
-    );
-  }
-}
-
-// DELETE /api/applications/[id]
-// Deletes an application by ID
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-
-    await prisma.application.delete({
-      where: { id },
-    });
-
-    return NextResponse.json({ message: "Application deleted" });
-  } catch (error) {
-    console.error("Error deleting application:", error);
-    return NextResponse.json(
-      { error: "Failed to delete application" },
+      { error: "Failed to create application" },
       { status: 500 }
     );
   }
