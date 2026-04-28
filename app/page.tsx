@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { prisma } from "@/lib/prisma";
+import Link from "next/link";
 
 export default async function Home() {
   // Fetch all applications from the database
@@ -30,7 +31,9 @@ export default async function Home() {
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button>Add Application</Button>
+            <Link href="/applications/new">
+              <Button>Add Application</Button>
+            </Link>
           </div>
         </header>
 
