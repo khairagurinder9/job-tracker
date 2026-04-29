@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
@@ -13,6 +14,23 @@ const STATUS_FILTERS = [
   { value: "REJECTED", label: "Rejected" },
 ];
 
+function getStatusBadgeClass(status: string) {
+  switch (status) {
+    case "APPLIED":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800";
+    case "INTERVIEWING":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800";
+    case "OFFER":
+      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border-green-200 dark:border-green-800";
+    case "REJECTED":
+      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 border-red-200 dark:border-red-800";
+    case "WITHDRAWN":
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-300 border-gray-200 dark:border-gray-800";
+    default:
+      return "";
+  }
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -21,18 +39,15 @@ export default async function Home({
   const params = await searchParams;
   const activeStatus = params.status || "all";
 
-  // Fetch ALL applications for stats (always show full counts)
   const allApplications = await prisma.application.findMany({
     orderBy: { dateApplied: "desc" },
   });
 
-  // Calculate stats from all applications
   const total = allApplications.length;
   const applied = allApplications.filter((a) => a.status === "APPLIED").length;
   const interviewing = allApplications.filter((a) => a.status === "INTERVIEWING").length;
   const offers = allApplications.filter((a) => a.status === "OFFER").length;
 
-  // Filter the visible list based on activeStatus
   const visibleApplications =
     activeStatus === "all"
       ? allApplications
@@ -109,7 +124,6 @@ export default async function Home({
             <CardTitle>Applications</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* Filter Tabs */}
             <Tabs value={activeStatus} className="mb-6">
               <TabsList>
                 {STATUS_FILTERS.map((filter) => (
@@ -129,7 +143,6 @@ export default async function Home({
               </TabsList>
             </Tabs>
 
-            {/* List */}
             {visibleApplications.length === 0 ? (
               <p className="text-muted-foreground text-sm">
                 No applications match this filter.
@@ -145,9 +158,12 @@ export default async function Home({
                       <p className="font-medium">{app.company}</p>
                       <p className="text-sm text-muted-foreground">{app.role}</p>
                     </div>
-                    <div className="text-sm text-muted-foreground">
+                    <Badge
+                      variant="outline"
+                      className={getStatusBadgeClass(app.status)}
+                    >
                       {app.status}
-                    </div>
+                    </Badge>
                   </div>
                 ))}
               </div>
