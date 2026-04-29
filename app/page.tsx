@@ -1,20 +1,42 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
-export default async function Home() {
-  // Fetch all applications from the database
-  const applications = await prisma.application.findMany({
+const STATUS_FILTERS = [
+  { value: "all", label: "All" },
+  { value: "APPLIED", label: "Applied" },
+  { value: "INTERVIEWING", label: "Interviewing" },
+  { value: "OFFER", label: "Offer" },
+  { value: "REJECTED", label: "Rejected" },
+];
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const params = await searchParams;
+  const activeStatus = params.status || "all";
+
+  // Fetch ALL applications for stats (always show full counts)
+  const allApplications = await prisma.application.findMany({
     orderBy: { dateApplied: "desc" },
   });
 
-  // Calculate stats
-  const total = applications.length;
-  const applied = applications.filter((a) => a.status === "APPLIED").length;
-  const interviewing = applications.filter((a) => a.status === "INTERVIEWING").length;
-  const offers = applications.filter((a) => a.status === "OFFER").length;
+  // Calculate stats from all applications
+  const total = allApplications.length;
+  const applied = allApplications.filter((a) => a.status === "APPLIED").length;
+  const interviewing = allApplications.filter((a) => a.status === "INTERVIEWING").length;
+  const offers = allApplications.filter((a) => a.status === "OFFER").length;
+
+  // Filter the visible list based on activeStatus
+  const visibleApplications =
+    activeStatus === "all"
+      ? allApplications
+      : allApplications.filter((a) => a.status === activeStatus);
 
   return (
     <div className="min-h-screen bg-background p-8">
@@ -49,7 +71,6 @@ export default async function Home() {
               <p className="text-3xl font-bold">{total}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -60,7 +81,6 @@ export default async function Home() {
               <p className="text-3xl font-bold">{applied}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -71,7 +91,6 @@ export default async function Home() {
               <p className="text-3xl font-bold">{interviewing}</p>
             </CardContent>
           </Card>
-
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -87,16 +106,37 @@ export default async function Home() {
         {/* Applications Section */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Applications</CardTitle>
+            <CardTitle>Applications</CardTitle>
           </CardHeader>
           <CardContent>
-            {applications.length === 0 ? (
+            {/* Filter Tabs */}
+            <Tabs value={activeStatus} className="mb-6">
+              <TabsList>
+                {STATUS_FILTERS.map((filter) => (
+                  <Link
+                    key={filter.value}
+                    href={
+                      filter.value === "all"
+                        ? "/"
+                        : `/?status=${filter.value}`
+                    }
+                  >
+                    <TabsTrigger value={filter.value}>
+                      {filter.label}
+                    </TabsTrigger>
+                  </Link>
+                ))}
+              </TabsList>
+            </Tabs>
+
+            {/* List */}
+            {visibleApplications.length === 0 ? (
               <p className="text-muted-foreground text-sm">
-                No applications yet. Click &ldquo;Add Application&rdquo; to get started.
+                No applications match this filter.
               </p>
             ) : (
               <div className="space-y-3">
-                {applications.map((app) => (
+                {visibleApplications.map((app) => (
                   <div
                     key={app.id}
                     className="flex items-center justify-between p-3 border rounded-lg"
