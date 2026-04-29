@@ -5,6 +5,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
 
 const STATUS_FILTERS = [
   { value: "all", label: "All" },
@@ -155,9 +156,12 @@ export default async function Home({
                     className="flex items-center justify-between p-3 border rounded-lg"
                   >
                     <div>
-                      <p className="font-medium">{app.company}</p>
-                      <p className="text-sm text-muted-foreground">{app.role}</p>
-                    </div>
+  <p className="font-medium">{app.company}</p>
+  <p className="text-sm text-muted-foreground">{app.role}</p>
+  <p className="text-xs text-muted-foreground mt-1">
+    Applied {formatDistanceToNow(app.dateApplied, { addSuffix: true })}
+  </p>
+</div>
                     <Badge
                       variant="outline"
                       className={getStatusBadgeClass(app.status)}
