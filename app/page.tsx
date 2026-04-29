@@ -4,8 +4,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
-import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 
 const STATUS_FILTERS = [
   { value: "all", label: "All" },
@@ -151,24 +151,27 @@ export default async function Home({
             ) : (
               <div className="space-y-3">
                 {visibleApplications.map((app) => (
-                  <div
+                  <Link
                     key={app.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
+                    href={`/applications/${app.id}/edit`}
+                    className="block"
                   >
-                    <div>
-  <p className="font-medium">{app.company}</p>
-  <p className="text-sm text-muted-foreground">{app.role}</p>
-  <p className="text-xs text-muted-foreground mt-1">
-    Applied {formatDistanceToNow(app.dateApplied, { addSuffix: true })}
-  </p>
-</div>
-                    <Badge
-                      variant="outline"
-                      className={getStatusBadgeClass(app.status)}
-                    >
-                      {app.status}
-                    </Badge>
-                  </div>
+                    <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                      <div>
+                        <p className="font-medium">{app.company}</p>
+                        <p className="text-sm text-muted-foreground">{app.role}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Applied {formatDistanceToNow(app.dateApplied, { addSuffix: true })}
+                        </p>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={getStatusBadgeClass(app.status)}
+                      >
+                        {app.status}
+                      </Badge>
+                    </div>
+                  </Link>
                 ))}
               </div>
             )}
