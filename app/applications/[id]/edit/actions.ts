@@ -5,19 +5,16 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 export async function updateApplication(id: string, formData: FormData) {
-  // Extract form values
   const company = formData.get("company") as string;
   const role = formData.get("role") as string;
   const status = formData.get("status") as string;
   const link = formData.get("link") as string;
   const notes = formData.get("notes") as string;
 
-  // Validate
   if (!company || !role) {
     throw new Error("Company and Role are required");
   }
 
-  // Update the database
   await prisma.application.update({
     where: { id },
     data: {
@@ -29,9 +26,15 @@ export async function updateApplication(id: string, formData: FormData) {
     },
   });
 
-  // Refresh cache
   revalidatePath("/");
+  redirect("/");
+}
 
-  // Redirect to homepage
+export async function deleteApplication(id: string) {
+  await prisma.application.delete({
+    where: { id },
+  });
+
+  revalidatePath("/");
   redirect("/");
 }

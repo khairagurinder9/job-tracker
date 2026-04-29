@@ -12,6 +12,7 @@ import {
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { updateApplication } from "./actions";
+import { DeleteButton } from "./delete-button";
 import Link from "next/link";
 
 export default async function EditApplicationPage({
@@ -21,17 +22,14 @@ export default async function EditApplicationPage({
 }) {
   const { id } = await params;
 
-  // Fetch the application
   const application = await prisma.application.findUnique({
     where: { id },
   });
 
-  // If not found, show 404
   if (!application) {
     notFound();
   }
 
-  // Bind the id to the action so it knows which record to update
   const updateActionWithId = updateApplication.bind(null, id);
 
   return (
@@ -53,7 +51,6 @@ export default async function EditApplicationPage({
         </div>
 
         <form action={updateActionWithId} className="space-y-6">
-          {/* Company */}
           <div className="space-y-2">
             <Label htmlFor="company">Company *</Label>
             <Input
@@ -64,7 +61,6 @@ export default async function EditApplicationPage({
             />
           </div>
 
-          {/* Role */}
           <div className="space-y-2">
             <Label htmlFor="role">Role *</Label>
             <Input
@@ -75,7 +71,6 @@ export default async function EditApplicationPage({
             />
           </div>
 
-          {/* Status */}
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select name="status" defaultValue={application.status}>
@@ -92,7 +87,6 @@ export default async function EditApplicationPage({
             </Select>
           </div>
 
-          {/* Link */}
           <div className="space-y-2">
             <Label htmlFor="link">Job Posting URL</Label>
             <Input
@@ -103,7 +97,6 @@ export default async function EditApplicationPage({
             />
           </div>
 
-          {/* Notes */}
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
             <Textarea
@@ -114,14 +107,16 @@ export default async function EditApplicationPage({
             />
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-2 pt-4">
-            <Button type="submit">Save Changes</Button>
-            <Link href="/">
-              <Button type="button" variant="outline">
-                Cancel
-              </Button>
-            </Link>
+          <div className="flex items-center justify-between pt-4">
+            <div className="flex gap-2">
+              <Button type="submit">Save Changes</Button>
+              <Link href="/">
+                <Button type="button" variant="outline">
+                  Cancel
+                </Button>
+              </Link>
+            </div>
+            <DeleteButton id={id} />
           </div>
         </form>
       </div>
