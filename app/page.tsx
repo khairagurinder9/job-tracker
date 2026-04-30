@@ -5,6 +5,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 import { formatDistanceToNow } from "date-fns";
+import { auth } from "@clerk/nextjs/server";
+import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 
 const STATUS_FILTERS = [
@@ -40,7 +42,12 @@ export default async function Home({
   const params = await searchParams;
   const activeStatus = params.status || "all";
 
+  // Get the current user's ID from Clerk
+  const { userId } = await auth();
+
+  // Fetch only THIS user's applications
   const allApplications = await prisma.application.findMany({
+    where: { userId: userId! },
     orderBy: { dateApplied: "desc" },
   });
 
@@ -72,6 +79,7 @@ export default async function Home({
             <Link href="/applications/new">
               <Button>Add Application</Button>
             </Link>
+            <UserButton />
           </div>
         </header>
 
@@ -146,7 +154,7 @@ export default async function Home({
 
             {visibleApplications.length === 0 ? (
               <p className="text-muted-foreground text-sm">
-                No applications match this filter.
+                No applications yet. Click &ldquo;Add Application&rdquo; to get started.
               </p>
             ) : (
               <div className="space-y-3">
