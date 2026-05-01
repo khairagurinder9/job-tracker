@@ -15,8 +15,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Job Application Tracker",
-  description: "Track your job applications in one place",
+  title: "Job Application Tracker | Track Your Job Search",
+  description: "A simple, fast tracker to manage your job applications. Built with Next.js, TypeScript, and Prisma.",
+  authors: [{ name: "Gurinder Khaira" }],
+  keywords: ["job tracker", "job applications", "career", "job search"],
+  openGraph: {
+    title: "Job Application Tracker",
+    description: "Track your job applications in one place",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

@@ -153,36 +153,51 @@ export default async function Home({
             </Tabs>
 
             {visibleApplications.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
-                No applications yet. Click &ldquo;Add Application&rdquo; to get started.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {visibleApplications.map((app) => (
-                  <Link
-                    key={app.id}
-                    href={`/applications/${app.id}/edit`}
-                    className="block"
-                  >
-                    <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <div>
-                        <p className="font-medium">{app.company}</p>
-                        <p className="text-sm text-muted-foreground">{app.role}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Applied {formatDistanceToNow(app.dateApplied, { addSuffix: true })}
-                        </p>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={getStatusBadgeClass(app.status)}
-                      >
-                        {app.status}
-                      </Badge>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+  <div className="flex flex-col items-center justify-center py-12 text-center">
+    <div className="text-5xl mb-4">🎯</div>
+    <h3 className="font-medium mb-1">
+      {activeStatus === "all"
+        ? "No applications yet"
+        : `No applications with status "${activeStatus.toLowerCase()}"`}
+    </h3>
+    <p className="text-muted-foreground text-sm mb-6 max-w-sm">
+      {activeStatus === "all"
+        ? "Start tracking your job search by adding your first application."
+        : "Try a different filter or add a new application."}
+    </p>
+    {activeStatus === "all" && (
+      <Link href="/applications/new">
+        <Button>Add your first application</Button>
+      </Link>
+    )}
+  </div>
+) : (
+  <div className="space-y-3">
+    {visibleApplications.map((app) => (
+      <Link
+        key={app.id}
+        href={`/applications/${app.id}/edit`}
+        className="block"
+      >
+        <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+          <div>
+            <p className="font-medium">{app.company}</p>
+            <p className="text-sm text-muted-foreground">{app.role}</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Applied {formatDistanceToNow(app.dateApplied, { addSuffix: true })}
+            </p>
+          </div>
+          <Badge
+            variant="outline"
+            className={getStatusBadgeClass(app.status)}
+          >
+            {app.status}
+          </Badge>
+        </div>
+      </Link>
+    ))}
+  </div>
+)}
           </CardContent>
         </Card>
       </div>
